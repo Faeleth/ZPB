@@ -1,0 +1,17 @@
+Temat: Temat 2 Rozpoznawanie emocji ludzi na obrazie z kamery.
+Członkowie i role w zespole:
+Maciej Halec(tester + detekcja twarzy),
+Kacper Michalski(tester + obsługa kamery),
+Krzysztof Bieńkowski(dev), 
+Jakub Gębicz(dev),
+Metodologia: Scrum
+Harmonogram:
+1. Omówienie wymagań sprzętowych i oprogramowania. Instalacja oraz konfiguracja kamery i narzędzi
+2. Analiza jakości zbioru, przygotowanie wybranych obrazów dla testów
+3. Implementacja detekcji twarzy za pomocą YOLO i/lub OpenCV – testy na wybranych obrazach
+4. Udoskonalenie algorytmów detekcji twarzy - działanie systemu w warunkach rzeczywistych
+5. Implementacja rozpoznawania emocji – przegląd modeli, wybór podejścia
+6. Testy na wybranych obrazach w celu rozpoznawania emocji
+7. Analiza wpływu czynników zewnętrznych (oświetlenie, garderoba, kolor skóry) na rozpoznawanie twarzy i emocji
+8. Integracja modułów projektu – testowanie całościowego systemu na obrazie z kamery
+9. Prezentacja wyników, omówienie wniosków

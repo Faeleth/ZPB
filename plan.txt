@@ -1,0 +1,4 @@
+1. Plan Aplikacji – co będzie zawierać, jakie moduły i za co będzie odpowiadać, co będzie efektem działania aplikacji
+2. Przygotowanie diagramów przedstawiających planowaną funkcjonalność aplikacji i jej interakcję z użytkownikiem
+3. Wybór technologii, bibliotek i ich instalacja
+4. Wybór i przygotowanie zbioru danych
