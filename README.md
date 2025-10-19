@@ -7,3 +7,5 @@
 - Przykładowe zbiory danych:
   - https://www.kaggle.com/datasets/fatihkgg/affectnet-yolo-format
   - https://www.kaggle.com/datasets/aklimarimi/8-facial-expressions-for-yolo
+
+![Diagram](diagram.png)

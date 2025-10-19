@@ -1,0 +1,19 @@
+graph TD
+    A[Użytkownik uruchamia aplikację] --> B[Moduł dialogu z kamerą]
+    B --> C[Moduł detekcji twarzy oraz jej elementów]
+    C --> D[Moduł normalizacji]
+    D --> E[Moduł rozpoznawania emocji/Klasyfikator]
+    E --> F[Moduł analizy sekwencji]
+    F --> G[Interfejs graficzny]
+    G --> H[Użytkownik otrzymuje wynik]
+    G --> I[Raport]
+    
+    style A fill:#088F8F
+    style B fill:#2D8F5F
+    style C fill:#2D8F5F
+    style D fill:#2D8F5F
+    style E fill:#2D8F5F
+    style F fill:#2D8F5F
+    style G fill:#527A7F
+    style H fill:#088F8F
+    style I fill:#C4A73B
