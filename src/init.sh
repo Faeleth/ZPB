@@ -11,4 +11,4 @@
 pip install -r requirements.txt
 
 # Run project using:
-# pyhon main.py
+# python main.py
