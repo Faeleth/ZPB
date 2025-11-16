@@ -2,7 +2,7 @@ import cv2
 from ultralytics import YOLO
 
 # Load your trained YOLO emotion detection model
-model = YOLO("emotion_yolo_model.pt")  # replace with your model path
+model = YOLO("./results/yolov8n_training_epochs100plus100/weights/best.pt")
 
 # Load OpenCV Haar cascade for face detection
 face_cascade = cv2.CascadeClassifier(
@@ -30,9 +30,7 @@ while True:
         face_rgb = cv2.cvtColor(face_crop, cv2.COLOR_BGR2RGB)
 
         # Run YOLO prediction on the face crop
-        results = model.predict(
-            face_rgb, imgsz=96, device="0"
-        )  # adjust imgsz to model input size
+        results = model.predict(face_rgb, device="0", conf=0.5)
 
         # Extract predicted class and confidence
         if results and len(results[0].boxes) > 0:

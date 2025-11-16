@@ -1,14 +1,20 @@
 from ultralytics import YOLO
 
 if __name__ == "__main__":
-    data_yaml = "..\YOLO_format\data.yaml"
+    data_yaml = "../YOLO_format/data.yaml"
 
     # Train (or load trained model)
     model = YOLO("yolov8n.pt")
-    model.train(data=data_yaml, epochs=100, device="0")
+    # Continue training
+    # model = YOLO("./results/yolov8n_training_epochs100/weights/best.pt")
 
-    # Save the trained model manually (optional)
-    model.save("emotion_yolo_model.pt")
-
-    # Later load and use the saved model
-    model = YOLO("emotion_yolo_model.pt")
+    results = model.train(
+        data=data_yaml,
+        epochs=200,
+        imgsz=800,
+        batch=-1,  # auto
+        name="yolov8n_training_epochs100",
+        project="./results",
+        device="0",
+        mosaic=0.0,
+    )
