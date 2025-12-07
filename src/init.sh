@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Project is made in Python 3.14.0
 # Create virtual enviroment:
 # python -m venv venv
 # Source in your terminal to run proj enviroment:
