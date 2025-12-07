@@ -10,11 +10,13 @@ if __name__ == "__main__":
 
     results = model.train(
         data=data_yaml,
-        epochs=200,
-        imgsz=640,
+        epochs=300,
+        imgsz=128,
         batch=-1,  # auto
-        name="yolo11s_training_epochs200",
+        name="yolo11s_training_epochs300_128",
         project="./results",
         device="0",
         mosaic=0.0,
+        # shear=10,
+        # perspective=0.0005,
     )

@@ -2,7 +2,7 @@ import cv2
 from ultralytics import YOLO
 
 # Load your trained YOLO emotion detection model
-model = YOLO("./results/yolo11s_training_epochs200/weights/best.pt")
+model = YOLO("./results/yolo11x_training_epochs300_128/weights/best.pt")
 
 # Load OpenCV Haar cascade for face detection
 face_cascade = cv2.CascadeClassifier(
