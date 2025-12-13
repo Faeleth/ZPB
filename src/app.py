@@ -116,8 +116,8 @@ class App(ctk.CTk):
             filetypes=[("Video/Image", "*.mp4 *.avi *.jpg *.png")]
         )
         if file_path:
-            print(f"Loaded file: {file_path}")
-            self.video_label.configure(text=f"Loaded: {file_path.split('/')[-1]}")
+            frame = cv2.imread(file_path)
+            self.display_image(frame)
 
     def start_stop(self):
         if self.is_running:
@@ -134,15 +134,18 @@ class App(ctk.CTk):
         if self.is_running and self.cap:
             ret, frame = self.cap.read()
             if ret:
-                frame_with_recognition = self.model.predict(frame)
-                pil_image = Image.fromarray(frame_with_recognition)
-                ctk_img = ctk.CTkImage(
-                    light_image=pil_image, dark_image=pil_image, size=(640, 480)
-                )
-                self.video_label.configure(image=ctk_img, text="")
-                self.video_label.image = ctk_img  # Garbage Collector protection
+                self.display_image(frame)
 
             self.after(10, self.update_frame)  # 10 ms
+
+    def display_image(self, frame):
+        frame_with_recognition = self.model.predict(frame)
+        pil_image = Image.fromarray(frame_with_recognition)
+        ctk_img = ctk.CTkImage(
+            light_image=pil_image, dark_image=pil_image, size=(640, 480)
+        )
+        self.video_label.configure(image=ctk_img, text="")
+        self.video_label.image = ctk_img  # Garbage Collector protection
 
     def update_frame(self):
         self.camera_loop()
