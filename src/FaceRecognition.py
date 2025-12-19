@@ -26,6 +26,8 @@ class FaceRecognition:
             gray, scaleFactor=1.1, minNeighbors=5
         )
 
+        plot_data = []
+
         for x, y, w, h in faces:
             extend_frame = 20
             x1 = int(max(0, x - extend_frame))
@@ -58,6 +60,8 @@ class FaceRecognition:
                 # Get class label name
                 emotion = self.model.names[cls_id]
 
+                plot_data.append([emotion, conf])
+
                 # Draw rectangle and label on original frame
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(
@@ -71,4 +75,4 @@ class FaceRecognition:
                 )
 
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        return frame_rgb
+        return frame_rgb, plot_data
