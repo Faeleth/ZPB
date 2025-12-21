@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Plot:
     def __init__(self, maxFrames=100):
         self.frames_ = [[] for i in range(maxFrames)]
@@ -12,7 +13,7 @@ class Plot:
             "Happy": [0, 0.0],
             "Neutral": [0, 0.0],
             "Sad": [0, 0.0],
-            "Surprise": [0, 0.0]
+            "Surprise": [0, 0.0],
         }
 
     def update(self, emotionsOnFrame):
@@ -20,7 +21,7 @@ class Plot:
         self.removeFrame()
         # zapisujemy ramke
         self.addFrame(emotionsOnFrame)
-        #update indexu
+        # update indexu
         if self.index_ + 1 >= len(self.frames_):
             self.index_ = 0
         else:
@@ -37,7 +38,9 @@ class Plot:
                 elif self.counts_[box[0]][0] - 1 <= 0:
                     self.counts_[box[0]][1] = 0.0
                 else:
-                    self.counts_[box[0]][1] = (self.counts_[box[0]][1] * self.counts_[box[0]][0] - box[1]) / (self.counts_[box[0]][0] - 1)
+                    self.counts_[box[0]][1] = (
+                        self.counts_[box[0]][1] * self.counts_[box[0]][0] - box[1]
+                    ) / (self.counts_[box[0]][0] - 1)
 
                 if self.counts_[box[0]][0] - 1 < 0:
                     self.counts_[box[0]][0] = 0
@@ -47,6 +50,8 @@ class Plot:
     def addFrame(self, emotionsOnFrame):
         if len(emotionsOnFrame) > 0:
             for box in emotionsOnFrame:
-                self.counts_[box[0]][1] = (self.counts_[box[0]][1] * self.counts_[box[0]][0] + box[1]) / (self.counts_[box[0]][0] + 1)
+                self.counts_[box[0]][1] = (
+                    self.counts_[box[0]][1] * self.counts_[box[0]][0] + box[1]
+                ) / (self.counts_[box[0]][0] + 1)
                 self.counts_[box[0]][0] += 1
         self.frames_[self.index_] = emotionsOnFrame

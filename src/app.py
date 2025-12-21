@@ -115,7 +115,7 @@ class App(ctk.CTk):
         self.btn_start_stop.pack(side="bottom", fill="x", padx=10, pady=20)
 
         self.create_bar_chart()
-        
+
         self.bind("<Configure>", self.resize_plot)
 
     # ============================================================
@@ -125,27 +125,29 @@ class App(ctk.CTk):
         fig, ax = plt.subplots(figsize=(6, 3))
         fig.subplots_adjust(left=0.24)
 
-        self.emotions = ["Anger",
-                    "Contempt",
-                    "Disgust",
-                    "Fear",
-                    "Happy",
-                    "Neutral",
-                    "Sad",
-                    "Surprise",]
+        self.emotions = [
+            "Anger",
+            "Contempt",
+            "Disgust",
+            "Fear",
+            "Happy",
+            "Neutral",
+            "Sad",
+            "Surprise",
+        ]
         values = np.zeros(len(self.emotions))
-        
+
         self.bars = ax.barh(self.emotions, values, color="#2196F3")
-        
+
         ax.set_xlim(0, 20)
-        
+
         ax.set_xlabel("Quantity")
 
-        fig.patch.set_facecolor('#2b2b2b')
-        ax.spines['top'].set_color('#2b2b2b')
-        ax.spines['right'].set_color('#2b2b2b')
-        ax.spines['left'].set_color('#2196F3')
-        ax.spines['bottom'].set_color('#2196F3')
+        fig.patch.set_facecolor("#2b2b2b")
+        ax.spines["top"].set_color("#2b2b2b")
+        ax.spines["right"].set_color("#2b2b2b")
+        ax.spines["left"].set_color("#2196F3")
+        ax.spines["bottom"].set_color("#2196F3")
         ax.set_facecolor("#2b2b2b")
         ax.grid(False)
 
@@ -155,7 +157,7 @@ class App(ctk.CTk):
 
         self.fig = fig
         self.ax = ax
-    
+
     def resize_plot(self, event):
         window_height = self.sidebar_frame.winfo_height()
         plot_height = window_height - 156
@@ -214,14 +216,16 @@ class App(ctk.CTk):
     def update_frame(self):
         if not self.is_running or not self.winfo_exists():
             return
-    
+
         self.camera_loop()
 
     def update_plot(self, class_counts):
         new_values = [item[0] for item in class_counts.values()]
         new_confidences = [item[1] for item in class_counts.values()]
 
-        for bar, emotion, count, confidence in zip(self.bars, self.emotions, new_values, new_confidences):
+        for bar, emotion, count, confidence in zip(
+            self.bars, self.emotions, new_values, new_confidences
+        ):
             if emotion in self.text_objects:
                 if count < 10:
                     self.text_objects[emotion].remove()
@@ -232,11 +236,11 @@ class App(ctk.CTk):
                 self.text_objects[emotion] = self.ax.text(
                     bar.get_width() / 2,
                     bar.get_y() + bar.get_height() / 2,
-                    f'{confidence:.4f}',
-                    va='center',
-                    ha='center',
-                    color='black',
-                    fontsize=10
+                    f"{confidence:.4f}",
+                    va="center",
+                    ha="center",
+                    color="black",
+                    fontsize=10,
                 )
             bar.set_width(count)
 
@@ -257,8 +261,3 @@ class App(ctk.CTk):
             self.cap.release()
 
         self.quit()
-
-
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
