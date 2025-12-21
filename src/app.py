@@ -269,7 +269,7 @@ class App(ctk.CTk):
 
         # If we are playing a video file, we manually skip frames to simulate real-time speed.
         if getattr(self, "is_video_file", False):
-            skip_rate = 5
+            skip_rate = 2
             for _ in range(skip_rate):
                 self.cap.grab()
 
