@@ -6,7 +6,8 @@ import cv2
 from PIL import Image
 from FaceRecognition import FaceRecognition
 from Plot import Plot
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
+import os
 
 
 class App(ctk.CTk):
@@ -27,6 +28,9 @@ class App(ctk.CTk):
         self.cap = None
         self.is_running = False
 
+        # Keep track of the temp file to clean it up later
+        self.temp_video_path = "temp_downscaled.mp4"
+
     def init_window(self):
         self.geometry("1000x600")
         self.title("Emotion Analysis App")
@@ -36,8 +40,6 @@ class App(ctk.CTk):
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
 
-        # Col 0: Wideo
-        # Col 1: Sidebar
         self.grid_columnconfigure(0, weight=3)
         self.grid_columnconfigure(1, weight=1)
 
@@ -100,12 +102,6 @@ class App(ctk.CTk):
         )
         self.plot_placeholder.pack(fill="x", padx=10, pady=10)
 
-        # self.label_stat_1 = ctk.CTkLabel(self.sidebar_frame, text="Emotion: -")
-        # self.label_stat_1.pack(pady=5)
-
-        # self.label_stat_2 = ctk.CTkLabel(self.sidebar_frame, text="Confidence: -")
-        # self.label_stat_2.pack(pady=5)
-
         self.btn_start_stop = ctk.CTkButton(
             self.sidebar_frame,
             text="Stop",
@@ -138,9 +134,7 @@ class App(ctk.CTk):
         values = np.zeros(len(self.emotions))
 
         self.bars = ax.barh(self.emotions, values, color="#2196F3")
-
         ax.set_xlim(0, 20)
-
         ax.set_xlabel("Quantity")
 
         fig.patch.set_facecolor("#2b2b2b")
@@ -166,19 +160,97 @@ class App(ctk.CTk):
         left_value = max(0, min(left_value, 0.85))
         self.fig.subplots_adjust(left=left_value)
 
-    def load_camera(self):
-        if not self.is_running:
-            self.cap = cv2.VideoCapture(0)
-            self.is_running = True
-            self.update_frame()
-
     def load_file(self):
         file_path = filedialog.askopenfilename(
             filetypes=[("Video/Image", "*.mp4 *.avi *.jpg *.png")]
         )
-        if file_path:
+        if not file_path:
+            return
+
+        if self.is_running:
+            self.is_running = False
+            if self.cap:
+                self.cap.release()
+            self.btn_start_stop.configure(text="Start")
+
+        ext = os.path.splitext(file_path)[1].lower()
+
+        if ext in [".mp4", ".avi", ".mov"]:
+            self.video_label.configure(text="Preprocessing video... please wait...")
+            self.update()
+
+            # Downscale the whole video first
+            optimized_path = self.preprocess_video(file_path)
+
+            self.cap = cv2.VideoCapture(optimized_path)
+            self.is_running = True
+            self.is_video_file = True  # Enable skip logic
+            self.btn_start_stop.configure(text="Stop")
+            self.camera_loop()
+
+        elif ext in [".jpg", ".png", ".jpeg"]:
             frame = cv2.imread(file_path)
-            self.display_image(frame)
+            if frame is not None:
+                self.display_image(frame)
+
+    def load_camera(self):
+        if not self.is_running:
+            self.cap = cv2.VideoCapture(0)
+            self.is_running = True
+            # camera does not need manual skipping
+            self.is_video_file = False
+            self.update_frame()
+
+    def preprocess_video(self, input_path):
+        """
+        Reads the input video. If it's larger than 640px wide, it downscales
+        the ENTIRE video to a temporary file before playback starts.
+        """
+        cap = cv2.VideoCapture(input_path)
+        if not cap.isOpened():
+            return input_path
+
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+
+        target_width = 640
+
+        # If video is already small enough, just return original path
+        if width <= target_width:
+            cap.release()
+            return input_path
+
+        # Calculate new dimensions
+        scale_ratio = target_width / width
+        new_width = target_width
+        new_height = int(height * scale_ratio)
+
+        # Setup Video Writer
+        # 'mp4v' is generally safe for mp4 containers in OpenCV
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(
+            self.temp_video_path, fourcc, fps, (new_width, new_height)
+        )
+
+        print(f"Downscaling video from {width}x{height} to {new_width}x{new_height}...")
+
+        # Process every frame
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            resized_frame = cv2.resize(
+                frame, (new_width, new_height), interpolation=cv2.INTER_AREA
+            )
+            out.write(resized_frame)
+
+        cap.release()
+        out.release()
+        print("Downscaling complete.")
+
+        return self.temp_video_path
 
     def start_stop(self):
         if self.is_running:
@@ -195,28 +267,44 @@ class App(ctk.CTk):
         if not self.is_running or not self.cap or not self.winfo_exists():
             return
 
+        # If we are playing a video file, we manually skip frames to simulate real-time speed.
+        if getattr(self, "is_video_file", False):
+            skip_rate = 5
+            for _ in range(skip_rate):
+                self.cap.grab()
+
         ret, frame = self.cap.read()
         if ret:
             self.display_image(frame)
 
-        after_id = self.after(10, self.update_frame)
-        self.after_ids.append(after_id)
+            after_id = self.after(10, self.update_frame)
+            self.after_ids.append(after_id)
+        else:
+            self.start_stop()
 
     def display_image(self, frame):
         frame_with_recognition, plot_data = self.model.predict(frame)
+
+        if not hasattr(self, "frame_count"):
+            self.frame_count = 0
+        self.frame_count += 1
+
         class_counts = self.plot.update(plot_data)
         self.update_plot(class_counts)
+
+        # Convert for tkinter
         pil_image = Image.fromarray(frame_with_recognition)
+
+        # Ensure it fits the UI box
         ctk_img = ctk.CTkImage(
             light_image=pil_image, dark_image=pil_image, size=(640, 480)
         )
         self.video_label.configure(image=ctk_img, text="")
-        self.video_label.image = ctk_img  # Garbage Collector protection
+        self.video_label.image = ctk_img
 
     def update_frame(self):
         if not self.is_running or not self.winfo_exists():
             return
-
         self.camera_loop()
 
     def update_plot(self, class_counts):
@@ -249,15 +337,20 @@ class App(ctk.CTk):
 
     def on_close(self):
         self.is_running = False
-
         for aid in self.after_ids:
             try:
                 self.after_cancel(aid)
             except Exception:
                 pass
         self.after_ids.clear()
-
         if self.cap:
             self.cap.release()
+
+        # Clean up temp file
+        if os.path.exists(self.temp_video_path):
+            try:
+                os.remove(self.temp_video_path)
+            except:
+                pass
 
         self.quit()
