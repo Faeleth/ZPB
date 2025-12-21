@@ -14,6 +14,8 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        self.FRAMES_TO_REMEMBER = 100
+
         self.init_window()
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         self.after_ids = []
@@ -22,7 +24,7 @@ class App(ctk.CTk):
             "./results/yolo11x_training_epochs300_128/weights/best.pt"
         )
 
-        self.plot = Plot(100)
+        self.plot = Plot(self.FRAMES_TO_REMEMBER)
         self.text_objects = {}
 
         self.cap = None
@@ -30,6 +32,22 @@ class App(ctk.CTk):
 
         # Keep track of the temp file to clean it up later
         self.temp_video_path = "temp_downscaled.mp4"
+
+    def reset_plot(self):
+        cc = {
+            "Anger": [0,0.0],
+            "Contempt": [0,0.0],
+            "Disgust": [0,0.0],
+            "Fear": [0,0.0],
+            "Happy": [0,0.0],
+            "Neutral": [0,0.0],
+            "Sad": [0,0.0],
+            "Surprise": [0,0.0],
+        }
+        self.update_plot(cc)
+        self.plot = Plot(self.FRAMES_TO_REMEMBER)
+        self.text_objects = {}
+        
 
     def init_window(self):
         self.geometry("1000x600")
@@ -57,7 +75,7 @@ class App(ctk.CTk):
         self.btn_camera = ctk.CTkButton(
             self.top_frame,
             text="Load Camera",
-            command=self.load_camera,
+            command=self.camera_load_button,
             height=40,
         )
 
@@ -135,7 +153,9 @@ class App(ctk.CTk):
 
         self.bars = ax.barh(self.emotions, values, color="#2196F3")
         ax.set_xlim(0, 20)
-        ax.set_xlabel("Quantity")
+        ax.set_xlabel("Quantity", color="white")
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
 
         fig.patch.set_facecolor("#2b2b2b")
         ax.spines["top"].set_color("#2b2b2b")
@@ -160,7 +180,12 @@ class App(ctk.CTk):
         left_value = max(0, min(left_value, 0.85))
         self.fig.subplots_adjust(left=left_value)
 
+    def camera_load_button(self):
+        self.reset_plot()
+        self.load_camera()
+
     def load_file(self):
+        self.reset_plot()
         file_path = filedialog.askopenfilename(
             filetypes=[("Video/Image", "*.mp4 *.avi *.jpg *.png")]
         )
@@ -314,11 +339,12 @@ class App(ctk.CTk):
         for bar, emotion, count, confidence in zip(
             self.bars, self.emotions, new_values, new_confidences
         ):
+            bar.set_width(count)
             if emotion in self.text_objects:
-                if count < 10:
+                if count <= 0:
                     self.text_objects[emotion].remove()
                     del self.text_objects[emotion]
-            if count > 10:
+            if bar.get_width() > 10:
                 if emotion in self.text_objects:
                     self.text_objects[emotion].remove()
                 self.text_objects[emotion] = self.ax.text(
@@ -327,11 +353,21 @@ class App(ctk.CTk):
                     f"{confidence:.4f}",
                     va="center",
                     ha="center",
-                    color="black",
+                    color="white",
                     fontsize=10,
                 )
-            bar.set_width(count)
-
+            elif bar.get_width() > 0:
+                if emotion in self.text_objects:
+                    self.text_objects[emotion].remove()
+                self.text_objects[emotion] = self.ax.text(
+                    bar.get_width() + 5,
+                    bar.get_y() + bar.get_height() / 2,
+                    f"{confidence:.4f}",
+                    va="center",
+                    ha="center",
+                    color="white",
+                    fontsize=10,
+                )
         self.ax.set_xlim(0, max(20, max(new_values) + 10))
         self.canvas.draw()
 
