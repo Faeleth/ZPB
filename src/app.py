@@ -344,23 +344,11 @@ class App(ctk.CTk):
                 if count <= 0:
                     self.text_objects[emotion].remove()
                     del self.text_objects[emotion]
-            if bar.get_width() > 10:
+            if bar.get_width() > 0:
                 if emotion in self.text_objects:
                     self.text_objects[emotion].remove()
                 self.text_objects[emotion] = self.ax.text(
-                    bar.get_width() / 2,
-                    bar.get_y() + bar.get_height() / 2,
-                    f"{confidence:.4f}",
-                    va="center",
-                    ha="center",
-                    color="white",
-                    fontsize=10,
-                )
-            elif bar.get_width() > 0:
-                if emotion in self.text_objects:
-                    self.text_objects[emotion].remove()
-                self.text_objects[emotion] = self.ax.text(
-                    bar.get_width() + 5,
+                    bar.get_width() + 3,
                     bar.get_y() + bar.get_height() / 2,
                     f"{confidence:.4f}",
                     va="center",
