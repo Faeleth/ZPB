@@ -14,7 +14,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.FRAMES_TO_REMEMBER = 100
+        self.FRAMES_TO_REMEMBER = 30
 
         self.init_window()
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -220,7 +220,7 @@ class App(ctk.CTk):
 
     def load_camera(self):
         if not self.is_running:
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture(1)
             self.is_running = True
             # camera does not need manual skipping
             self.is_video_file = False
